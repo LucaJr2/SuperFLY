@@ -1,0 +1,108 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Timers;
+// dont skid black niggers
+
+namespace SuperApi
+{
+	// Token: 0x02000002 RID: 2
+	public static class SuperApi
+	{
+		// Token: 0x06000001 RID: 1
+		[DllImport("bin\\Super.dll", CallingConvention = CallingConvention.Cdecl)]
+		private static extern void Initialize();
+
+		// Token: 0x06000002 RID: 2
+		[DllImport("bin\\Super.dll", CallingConvention = CallingConvention.Cdecl)]
+		private static extern void Attach();
+
+		// Token: 0x06000003 RID: 3
+		[DllImport("bin\\Super.dll", CallingConvention = CallingConvention.Cdecl)]
+		private static extern IntPtr GetClients();
+
+		// Token: 0x06000004 RID: 4
+		[DllImport("bin\\Super.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+		private static extern void Execute(byte[] scriptSource, string[] clientUsers, int numUsers);
+
+		// Token: 0x06000005 RID: 5 RVA: 0x00002048 File Offset: 0x00000248
+		public static void AttachAPI()
+		{
+			SuperApi.Initialize();
+			SuperApi.Attach();
+			Thread.Sleep(1);
+			string s = "\tgame:GetService(\"StarterGui\"):SetCore(\"SendNotification\", {\r\n\t\tTitle = \"[SuperAPI]\",\r\n\t\tText = \"Skibidi Sigma\"\r\n\t})";
+			List<SuperApi.ClientInfo> clientsList = SuperApi.GetClientsList();
+			string[] array = (from c in clientsList
+							  select c.name).ToArray<string>();
+			SuperApi.Execute(Encoding.UTF8.GetBytes(s), array, array.Length);
+		}
+
+		// Token: 0x06000006 RID: 6 RVA: 0x000020BC File Offset: 0x000002BC
+		public static void ExecuteScript(string scriptSource)
+		{
+			List<SuperApi.ClientInfo> clientsList = SuperApi.GetClientsList();
+			string[] array = (from c in clientsList
+							  select c.name).ToArray<string>();
+			SuperApi.Execute(Encoding.UTF8.GetBytes(scriptSource), array, array.Length);
+		}
+
+		// Token: 0x06000007 RID: 7 RVA: 0x00002110 File Offset: 0x00000310
+		public static bool IsRobloxOpen()
+		{
+			return Process.GetProcessesByName("RobloxPlayerBeta").Length != 0;
+		}
+
+		// Token: 0x06000008 RID: 8 RVA: 0x00002130 File Offset: 0x00000330
+		public static void KillRoblox()
+		{
+			bool flag = SuperApi.IsRobloxOpen();
+			if (flag)
+			{
+				Process[] processesByName = Process.GetProcessesByName("RobloxPlayerBeta");
+				foreach (Process process in processesByName)
+				{
+					process.Kill();
+				}
+			}
+		}
+
+        // Token: 0x06000009 RID: 9 RVA: 0x00002174 File Offset: 0x00000374
+        public static List<SuperApi.ClientInfo> GetClientsList()
+		{
+			List<SuperApi.ClientInfo> list = new List<SuperApi.ClientInfo>();
+			IntPtr intPtr = SuperApi.GetClients();
+			for (; ; )
+			{
+				SuperApi.ClientInfo clientInfo = Marshal.PtrToStructure<SuperApi.ClientInfo>(intPtr);
+				bool flag = clientInfo.name == null;
+				if (flag)
+				{
+					break;
+				}
+				list.Add(clientInfo);
+				intPtr += Marshal.SizeOf<SuperApi.ClientInfo>();
+			}
+			return list;
+		}
+
+
+
+        // Token: 0x02000003 RID: 3
+        public struct ClientInfo
+		{
+			// Token: 0x04000001 RID: 1
+			public string version;
+
+			// Token: 0x04000002 RID: 2
+			public string name;
+
+			// Token: 0x04000003 RID: 3
+			public int id;
+		}
+	}
+}
